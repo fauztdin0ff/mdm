@@ -138,23 +138,41 @@ function initHeroParallax() {
 Barba
 ============================================================================*/
 function initBarba() {
+   barba.hooks.before(() => {
+      document.body.classList.add("is-animating");
+   });
+
+   barba.hooks.after(() => {
+      document.body.classList.remove("is-animating");
+   });
+
    barba.init({
+      debug: true,
+
       transitions: [
          {
             name: "fade",
 
+            sync: true,
+
+            once({ next }) {
+               next.container.classList.add("barba-enter-active");
+            },
+
             leave({ current }) {
                return new Promise((resolve) => {
-                  window.closeMenu?.();
-
                   current.container.classList.add("barba-leave");
 
-                  setTimeout(resolve, 50);
+                  setTimeout(resolve, 400);
                });
             },
 
             beforeEnter({ next }) {
-               window.scrollTo(0, 0);
+               /*
+                * Фиксируем viewport.
+                * Пользователь больше не может увидеть изменение scroll.
+                */
+               document.body.classList.add("barba-lock");
 
                next.container.classList.add("barba-enter");
             },
@@ -166,6 +184,14 @@ function initBarba() {
             },
 
             afterEnter({ next }) {
+               /*
+                * Теперь новая страница уже готова.
+                * Мгновенно ставим scroll наверх.
+                */
+               window.scrollTo(0, 0);
+
+               document.body.classList.remove("barba-lock");
+
                next.container.classList.remove(
                   "barba-enter",
                   "barba-enter-active"
