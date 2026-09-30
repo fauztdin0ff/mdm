@@ -22,30 +22,46 @@ __webpack_require__.r(__webpack_exports__);
 Menu
 ============================================================================*/
 function burgerMenu() {
-   const menuIcon = document.querySelector(".menu__icon");
-   const menuBody = document.querySelector(".menu__body");
    const body = document.body;
-   const menuBodyClose = document.querySelector(".menu__close");
-
-   if (!menuIcon || !menuBody) return;
-
-   const closeMenu = () => {
-      menuIcon.classList.remove("active");
-      menuBody.classList.remove("active");
-      body.classList.remove("no-scroll");
-   };
-
-   menuIcon.addEventListener("click", () => {
-      menuIcon.classList.toggle("active");
-      menuBody.classList.toggle("active");
-      body.classList.toggle("no-scroll");
-   });
-
-   if (menuBodyClose) menuBodyClose.addEventListener("click", closeMenu);
 
    document.addEventListener("click", (e) => {
-      if (!menuBody.contains(e.target) && !menuIcon.contains(e.target)) closeMenu();
+      const menuIcon = e.target.closest(".menu__icon");
+      const menuClose = e.target.closest(".menu__close");
+      const menuBody = document.querySelector(".menu__body");
+
+      if (!menuBody) return;
+
+      if (menuIcon) {
+         menuIcon.classList.toggle("active");
+         menuBody.classList.toggle("active");
+         body.classList.toggle("no-scroll");
+
+         return;
+      }
+
+      if (menuClose) {
+         closeMenu();
+         return;
+      }
+
+      if (
+         !menuBody.contains(e.target) &&
+         !e.target.closest(".menu__icon")
+      ) {
+         closeMenu();
+      }
    });
+
+   function closeMenu() {
+      const menuIcon = document.querySelector(".menu__icon");
+      const menuBody = document.querySelector(".menu__body");
+
+      menuIcon?.classList.remove("active");
+      menuBody?.classList.remove("active");
+      body.classList.remove("no-scroll");
+   }
+
+   window.closeMenu = closeMenu;
 }
 
 /*==========================================================================
@@ -129,6 +145,8 @@ function initBarba() {
 
             leave({ current }) {
                return new Promise((resolve) => {
+                  window.closeMenu?.();
+
                   current.container.classList.add("barba-leave");
 
                   setTimeout(resolve, 50);
@@ -165,11 +183,11 @@ Initialization
 ============================================================================*/
 function initPage() {
    initHeroParallax();
-   burgerMenu();
    initFadeAnimations();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+   burgerMenu();
    initPage();
    initBarba();
 });
